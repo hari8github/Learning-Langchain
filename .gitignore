@@ -1,0 +1,4 @@
+.env
+
+langchain_env/
+__pycache__/

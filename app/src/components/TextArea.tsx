@@ -46,20 +46,25 @@ const TextArea = ({
     setIsGenerating(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/invoke?content=${text}`, {
+      console.log('Sending request to backend...');
+      
+      const res = await fetch(`http://localhost:8000/invoke`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(text),
+        body: JSON.stringify({ content: text }),
       });
 
+      console.log('Response received, status:', res.status);
+
       if (!res.ok) {
-        throw new Error("Error");
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
 
       const data = res.body;
       if (!data) {
+        console.log('No response body');
         setIsGenerating(false);
         return;
       }
@@ -71,12 +76,14 @@ const TextArea = ({
       let currentSteps: { name: string; result: Record<string, string> }[] = [];
       let buffer = "";
 
+      console.log('Starting to read stream...');
+
       // Process streaming response chunks and parse steps/results
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
         let chunkValue = decoder.decode(value);
-        // console.log(`chunk: ${chunkValue}`);
+        console.log(`chunk: ${chunkValue}`); // Added for debugging
         if (!chunkValue) continue;
 
         buffer += chunkValue;
@@ -100,6 +107,7 @@ const TextArea = ({
                       currentSteps.push({ name: matchStepName, result });
                       buffer = buffer.replace(fullMatch, "");
                     } catch (error) {
+                      console.error("Error parsing step JSON:", error);
                     }
                   }
                 }
@@ -136,7 +144,22 @@ const TextArea = ({
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error("Fetch error details:", error);
+      
+      // Add user-friendly error handling
+      setOutputs((prevState) => {
+        const lastOutput = prevState[prevState.length - 1];
+        return [
+          ...prevState.slice(0, -1),
+          {
+            ...lastOutput,
+            result: {
+              answer: `Error: ${error instanceof Error ? error.message : 'Failed to connect to server. Please check if the backend is running on http://localhost:8000'}`,
+              tools_used: [],
+            },
+          },
+        ];
+      });
     } finally {
       setIsGenerating(false);
     }

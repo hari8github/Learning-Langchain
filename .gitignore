@@ -1,5 +1,1 @@
-.env
-mcp-tryout.ipynb
-
-langchain_env/
-__pycache__/
+/langchain_env

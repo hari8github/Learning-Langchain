@@ -176,11 +176,9 @@ This project is for educational purposes, inspired by Perplexity AI.
 
 ## 🙏 Acknowledgments
 
-- Built following John Briggs' LangChain tutorial
+- Built following James Briggs' LangChain tutorial
 - Inspired by Perplexity AI's interface and functionality
 - Uses Groq's lightning-fast LLaMA inference
 - Powered by SerpAPI for real-time search results
 
 ---
-
-**⭐ If you found this project helpful, please give it a star!**
